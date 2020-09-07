@@ -13,6 +13,10 @@ const io = socketio(server);
 io.on("connection", (socket) => {
   console.log("Une nouvelle connexion s'est produite.");
 
+  socket.on("entered", ({ name, room }, callback) => {
+    console.log(name, room);
+  });
+
   socket.on("disconnect", () => {
     console.log("L'utilisateur vient de quitter.");
   });
