@@ -1,6 +1,7 @@
 const express = require("express");
 const socketio = require("socket.io");
 const http = require("http");
+const cors = require("cors");
 
 const { addUser, removeUser, getUser, getUsersInRoom } = require("./users");
 
@@ -12,11 +13,23 @@ const app = express();
 const server = http.createServer(app);
 const io = socketio(server);
 
+// const timestamp = new Date().getTime();
+// console.log(timestamp);
+// const timestampToDate = new Date(timestamp);
+// console.log(timestampToDate);
+
 io.on("connection", (socket) => {
   socket.on("entered", ({ name, room }, callback) => {
     const { error, user } = addUser({ id: socket.id, name, room });
 
-    if (error) return callback(error);
+    if (error) {
+      socket.emit("message", {
+        user: "admin",
+        text: `${error} Pour entrer dans cette salle, cliquez sur le bouton Quitter et essayez avec un autre nom.`,
+      });
+
+      return callback(error);
+    }
 
     socket.emit("message", {
       user: "admin",
@@ -62,6 +75,7 @@ io.on("connection", (socket) => {
 });
 
 app.use(router);
+app.use(cors());
 
 server.listen(PORT, () =>
   console.log(`Le serveur a démarré sur le port ${PORT}`)
